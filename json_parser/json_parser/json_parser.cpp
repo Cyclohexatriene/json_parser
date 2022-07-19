@@ -28,6 +28,7 @@ private:
     vector<string> keys;
 
     int type;
+    string output;
     
     void del() {
         if (type == STR) STRING_VAL = "";
@@ -142,42 +143,42 @@ private:
 
     //printers
     void printNULL() {
-        cout << "null";
+        output+= "null";
     }
     void printINT() {
-        cout << INT_VAL;
+        output += to_string(INT_VAL);
     }
     void printSTR() {
-        cout << '"'<<STRING_VAL<<'"';
+        output += '"' + STRING_VAL + '"';
     }
     void printDOUBLE() {
-        cout << DOUBLE_VAL;
+        output += to_string(DOUBLE_VAL);
     }
     void printBOOL() {
-        if (BOOL_VAL) cout << "true";
-        else cout << "false";
+        if (BOOL_VAL) output += "true";
+        else output += "false";
     }
     void printOBJECT() {
-        cout << "{ ";
+        output += "{ ";
         bool a = true;
         for (auto i : keys) {
             if (a) a = false;
-            else cout << " , ";
-            cout << i;
-            cout << " : ";
-            OBJECT_VAL[i]->show(false);
+            else output += " , ";
+            output += i;
+            output += " : ";
+            output+=OBJECT_VAL[i]->generate_str();
         }
-        cout << " }";
+        output += " }";
     }
     void printLIST() {
-        cout << "[";
+        output += "[";
         bool a = true;
         for (auto i : LIST_VAL) {
             if (a) a = false;
-            else cout << " , ";
-            i->show(false);
+            else output += " , ";
+            output += i->generate_str();
         }
-        cout << "]";
+        output += "]";
     }
 
 public:
@@ -218,7 +219,7 @@ public:
         BOOL_VAL = x;
     }
 
-    
+    //tools
     string get_type() {
         if (type == INT) return "INT";
         if (type == DOUBLE) return "DOUBLE";
@@ -228,15 +229,24 @@ public:
         if (type == LIST) return "LIST";
         return "NULL";
     }
-    
     void parse(string json) {
         ss.clear();
         ss << json;
         ss >> ws;
         *this = parse_val();
     }
-
     void show(bool end = true) {
+        cout << generate_str();
+        if (end) cout << endl;
+    }
+    Object get_val(string key) {
+        return  *OBJECT_VAL['"'+key+'"'];
+    }
+    Object get_val(int idx) {
+        return *LIST_VAL[idx];
+    }
+    string generate_str() {
+        output.clear();
         if (type == NULL) printNULL();
         else if (type == INT) printINT();
         else if (type == DOUBLE) printDOUBLE();
@@ -244,15 +254,7 @@ public:
         else if (type == BOOL) printBOOL();
         else if (type == OBJECT) printOBJECT();
         else if (type == LIST) printLIST();
-        if (end) cout << endl;
-    }
-
-    //indexing
-    Object get_val(string key) {
-        return  *OBJECT_VAL['"'+key+'"'];
-    }
-    Object get_val(int idx) {
-        return *LIST_VAL[idx];
+        return output;
     }
 };
 
@@ -264,5 +266,6 @@ int main()
     );
     test.show();
     test.get_val("sites").get_val(0).get_val("name").show();
+    cout << test.generate_str();
     
 }
