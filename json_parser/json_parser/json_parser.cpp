@@ -23,8 +23,8 @@ private:
     double DOUBLE_VAL;
     string STRING_VAL;
     bool BOOL_VAL;
-    unordered_map<string, Object> OBJECT_VAL;
-    vector<Object> LIST_VAL;
+    unordered_map<string, Object* > OBJECT_VAL;
+    vector<Object* > LIST_VAL;
     vector<string> keys;
 
     int type;
@@ -39,7 +39,7 @@ private:
         type = a;
     }
 
-    void insert(string key, Object val) {
+    void insert(string key, Object* val) {
         if (type != OBJECT) {
             del();
             set_type(OBJECT);
@@ -47,7 +47,7 @@ private:
         keys.push_back(key);
         OBJECT_VAL[key] = val;
     }
-    void push(Object val) {
+    void push(Object* val) {
         if (type != LIST) {
             del();
             set_type(LIST);
@@ -104,8 +104,8 @@ private:
             string key;
             while (ss.peek() != ' ' && ss.peek() != ':' && ss.peek() != '\t' && ss.peek() != '\n') key += ss.get();
             ss >> ws; ss.get(); ss >> ws;//remove ':' and whitespaces
-            Object val;
-            val = parse_val();
+            Object* val = new Object();
+            *val = parse_val();
             res.insert(key, val);
             //remove ',' and whitespaces
             ss >> ws;
@@ -121,7 +121,8 @@ private:
         ss.get();
         Object res;
         while (ss.peek() != ']') {
-            Object temp = parse_val();
+            Object* temp = new Object();
+            *temp = parse_val();
             res.push(temp);
             ss >> ws;
             if (ss.peek() == ',') {
@@ -130,6 +131,7 @@ private:
             }
         }
         ss.get();
+        res.set_type(LIST);
         return res;
         
     }
@@ -145,7 +147,7 @@ private:
         cout << INT_VAL;
     }
     void printSTR() {
-        cout << STRING_VAL;
+        cout << '"'<<STRING_VAL<<'"';
     }
     void printDOUBLE() {
         cout << DOUBLE_VAL;
@@ -162,7 +164,7 @@ private:
             else cout << " , ";
             cout << i;
             cout << " : ";
-            OBJECT_VAL[i].show(false);
+            OBJECT_VAL[i]->show(false);
         }
         cout << " }";
     }
@@ -172,7 +174,7 @@ private:
         for (auto i : LIST_VAL) {
             if (a) a = false;
             else cout << " , ";
-            i.show(false);
+            i->show(false);
         }
         cout << "]";
     }
@@ -241,20 +243,21 @@ public:
         else if (type == LIST) printLIST();
         if (end) cout << endl;
     }
-
-
-    
+    Object get_val(string key) {
+        return  *OBJECT_VAL['"'+key+'"'];
+    }
+    Object get_val(int idx) {
+        return *LIST_VAL[idx];
+    }
 };
-
-
 
 int main()
 {
     Object test;
     test.parse(
-        "{ \"headers\": {\"SalesPerson\": [\"sales_id\", \"name\", \"salary\", \"commission_rate\",\"hire_date\"], \"Company\": [\"com_id\", \"name\",\"city\"],\"Orders\":[\"order_id\",\"order_date\",\"com_id\",\"sales_id\",\"amount\"]}, \"rows\": {\"SalesPerson\": [[1, \"John\", 100000, 6, \"4/1/2006\"], [2, \"Amy\", 12000, 5,\"5/1/2010\"], [3, \"Mark\", 65000, 12, \"12/25/2008\"], [4, \"Pam\", 25000, 25,\"1/1/2005\"],[5,\"Alex\",5000,10,\"2/3/2007\"]], \"Company\": [[1, \"RED\",\"Boston\"], [2, \"ORANGE\", \"New York\"],[3, \"YELLOW\", \"Boston\"],[4, \"GREEN\", \"Austin\"]],\"Orders\":[[1,\"1/1/2014\",3,4,10000],[2, \"2/1/2014\", 4, 5, 5000],[3, \"3/1/2014\", 1, 1, 50000],[4, \"4/1/2014\", 1, 4, 25000]]}}"
+        "{\"sites\": [{ \"name\":\"菜鸟教程\" , \"url\":\"www.runoob.com\" }, { \"name\":\"google\" , \"url\":\"www.google.com\" }, { \"name\":\"微博\" , \"url\":\"www.weibo.com\" }]}"
     );
     test.show();
-
+    test.get_val("sites").get_val(0).get_val("name").show();
     
 }
