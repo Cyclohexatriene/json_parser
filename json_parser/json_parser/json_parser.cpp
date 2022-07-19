@@ -140,6 +140,7 @@ private:
         return Object();
     }
 
+    //printers
     void printNULL() {
         cout << "null";
     }
@@ -178,6 +179,7 @@ private:
         }
         cout << "]";
     }
+
 public:
     //constructors
     Object() {
@@ -233,6 +235,7 @@ public:
         ss >> ws;
         *this = parse_val();
     }
+
     void show(bool end = true) {
         if (type == NULL) printNULL();
         else if (type == INT) printINT();
@@ -243,6 +246,8 @@ public:
         else if (type == LIST) printLIST();
         if (end) cout << endl;
     }
+
+    //indexing
     Object get_val(string key) {
         return  *OBJECT_VAL['"'+key+'"'];
     }
